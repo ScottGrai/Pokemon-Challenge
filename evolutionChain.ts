@@ -4,23 +4,45 @@ import * as readline from "readline";
 import { IChainLink, IEvolutionChain, IPokemonSpecies, IReturnEvolutionChain } from "./models/interfaces";
 
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
-rl.question("Please input pokemon name: ", (answer) => {
-  const pokemonName = answer.toLowerCase();
+// This is the function that Google Cloud Functions would call when requests are made to the endpoint 
+// and how the project would run when deployed as a GFC
 
-  queryAndFormatChainLink(pokemonName)
-  .then((result) => {
-    console.log(JSON.stringify(result, null, 2));
+// export async function evolutionChain(req, res) {
+//   if (req.query?.pokemonToSearch) {
+//     try {
+//       const result = await queryAndFormatChainLink(req.query.pokemonToSearch);
+//       res.json(result);
+//     } catch (error) {
+//       res.error(error);
+//     }
+//   }
+// }
+
+// In this instance we just run it locally via this function call
+
+evolutionChain();
+
+function evolutionChain() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
   });
 
-  rl.close();
-});
+  rl.question("Please input pokemon name: ", (answer) => {
+    const pokemonName = answer.toLowerCase();
 
-async function queryAndFormatChainLink(name: string, url?: string): Promise<IReturnEvolutionChain> {
+    queryAndFormatChainLink(pokemonName)
+      .then((result) => {
+        console.log(JSON.stringify(result, null, 2));
+        // Return the result to the server that request it
+      });
+
+    rl.close();
+  });
+}
+
+export async function queryAndFormatChainLink(name: string, url?: string): Promise<IReturnEvolutionChain> {
   let species: IPokemonSpecies;
   if (url) {
     species = await querySpecies("", url);
@@ -43,17 +65,13 @@ async function querySpecies(name: string, url?: string): Promise<IPokemonSpecies
     throw new Error("No endpoint or name provided");
   }
 
-  try {
-    const result = await fetch(endpoint);
-    if (result.status !== 200) {
-      // return the error rather than throw new one
-      throw new Error("Invalid pokemon name");
-    }
-    const resultJson = await result.json();
-    return resultJson as IPokemonSpecies;
-  } catch (err) {
-    throw new Error(err);
+  const result = await fetch(endpoint);
+  if (result.status !== 200) {
+    // return the error rather than throw new one
+    throw new Error("Invalid pokemon name");
   }
+  const resultJson = await result.json();
+  return resultJson as IPokemonSpecies;
 }
 
 async function queryEvolutionChain(endpoint: string): Promise<IEvolutionChain> {
