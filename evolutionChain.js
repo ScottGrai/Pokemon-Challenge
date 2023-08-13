@@ -9,20 +9,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.queryAndFormatChainLink = void 0;
 const node_fetch_1 = require("node-fetch");
 const readline = require("readline");
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-rl.question("Please input pokemon name: ", (answer) => {
-    const pokemonName = answer.toLowerCase();
-    queryAndFormatChainLink(pokemonName)
-        .then((result) => {
-        console.log(JSON.stringify(result, null, 2));
+// This is the function that Google Cloud Functions would call when requests are made to the endpoint 
+// and how the project would run when deployed as a GFC
+// export async function evolutionChain(req, res) {
+//   if (req.query?.pokemonToSearch) {
+//     try {
+//       const result = await queryAndFormatChainLink(req.query.pokemonToSearch);
+//       res.json(result);
+//     } catch (error) {
+//       res.error(error);
+//     }
+//   }
+// }
+// In this instance we just run it locally via this function call
+evolutionChain();
+function evolutionChain() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
     });
-    rl.close();
-});
+    rl.question("Please input pokemon name: ", (answer) => {
+        const pokemonName = answer.toLowerCase();
+        queryAndFormatChainLink(pokemonName)
+            .then((result) => {
+            console.log(JSON.stringify(result, null, 2));
+            // Return the result to the server that request it
+        });
+        rl.close();
+    });
+}
 function queryAndFormatChainLink(name, url) {
     return __awaiter(this, void 0, void 0, function* () {
         let species;
@@ -36,6 +54,7 @@ function queryAndFormatChainLink(name, url) {
         return processEvolutionChain(evolutionChain.chain);
     });
 }
+exports.queryAndFormatChainLink = queryAndFormatChainLink;
 function querySpecies(name, url) {
     return __awaiter(this, void 0, void 0, function* () {
         let endpoint = "";
@@ -48,18 +67,13 @@ function querySpecies(name, url) {
         else {
             throw new Error("No endpoint or name provided");
         }
-        try {
-            const result = yield (0, node_fetch_1.default)(endpoint);
-            if (result.status !== 200) {
-                // return the error rather than throw new one
-                throw new Error("Invalid pokemon name");
-            }
-            const resultJson = yield result.json();
-            return resultJson;
+        const result = yield (0, node_fetch_1.default)(endpoint);
+        if (result.status !== 200) {
+            // return the error rather than throw new one
+            throw new Error("Invalid pokemon name");
         }
-        catch (err) {
-            throw new Error(err);
-        }
+        const resultJson = yield result.json();
+        return resultJson;
     });
 }
 function queryEvolutionChain(endpoint) {
