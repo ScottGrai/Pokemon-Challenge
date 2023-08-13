@@ -67,7 +67,6 @@ async function querySpecies(name: string, url?: string): Promise<IPokemonSpecies
 
   const result = await fetch(endpoint);
   if (result.status !== 200) {
-    // return the error rather than throw new one
     throw new Error("Invalid pokemon name");
   }
   const resultJson = await result.json();
