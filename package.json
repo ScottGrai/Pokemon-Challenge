@@ -5,6 +5,7 @@
   "scripts": {
     "test": "npx jest",
     "tsc": "tsc --watch",
+    "build": "tsc",
     "debug": "nodemon --inspect=8080 evolutionChain",
     "deploy_evolutionChain_test": "npx webpack && gcloud beat functions deploy evolutionChain_test --gen2 --entry-point evolutionChain --trigger-http --memory=256MiB --region=europe-west1 --runtime=nodejs18 --env-vars-file test.env.yaml --project=fakeproject",
     "deploy_evolutionChain_prod": "pretend cloudfunctions deployment script for production",
