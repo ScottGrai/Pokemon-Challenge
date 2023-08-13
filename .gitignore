@@ -3,3 +3,9 @@ node_modules
 
 # Serverless directories
 .serverless
+
+# Blocked extensions
+*.js.map
+*.map
+
+models/*.js
